@@ -1,0 +1,229 @@
+---
+title: "ThronesMining"
+author: "Roman Ismagilov"
+date: '10 dec 2017'
+output: pdf_document
+---
+
+```{r}
+library(dplyr)
+data <- read.csv("character-predictions.csv")
+table(data$title)
+table(data$culture)
+str(data)
+
+battles <- read.csv("battles.csv", na.strings=c(""))
+battles %>% str
+
+data %>% filter(title == "Winterfell")
+```
+
+```{r}
+battles %>% filter(attacker_outcome == "win") %>% mutate(rate = attacker_size / defender_size) %>% filter(!is.na(rate)) %>% summarise(avg = mean(rate))
+
+battles %>% filter(attacker_outcome == "loss") %>% mutate(rate =  defender_size / attacker_size) %>% filter(!is.na(rate)) %>% summarise(avg = mean(rate))
+
+```
+
+# Clustering
+```{r}
+allies <- data.frame("first" = character(), "last" = character(), stringsAsFactors=FALSE)
+for (i in c(1:nrow(battles))) {
+  battle <- battles[i,]
+  if (!is.na(battle$attacker_2)) {
+    allies[nrow(allies) + 1,] = c(battle$attacker_2 %>% as.character(), battle$attacker_1 %>% as.character())
+    
+    allies[nrow(allies) + 1,] = c(battle$attacker_1 %>% as.character(), battle$attacker_2 %>% as.character())
+  }
+  if (!is.na(battle$attacker_3)) {
+    allies[nrow(allies) + 1,] = c(battle$attacker_3 %>% as.character(), battle$attacker_1 %>% as.character())
+    allies[nrow(allies) + 1,] = c(battle$attacker_2 %>% as.character(), battle$attacker_3 %>% as.character())
+    
+    allies[nrow(allies) + 1,] = c(battle$attacker_1 %>% as.character(), battle$attacker_3 %>% as.character())
+    allies[nrow(allies) + 1,] = c(battle$attacker_3 %>% as.character(), battle$attacker_2 %>% as.character())
+  }
+  if (!is.na(battle$attacker_4)) {
+    allies[nrow(allies) + 1,] = c(battle$attacker_4 %>% as.character(), battle$attacker_1 %>% as.character())
+    allies[nrow(allies) + 1,] = c(battle$attacker_4 %>% as.character(), battle$attacker_3 %>% as.character())
+    allies[nrow(allies) + 1,] = c(battle$attacker_4 %>% as.character(), battle$attacker_2 %>% as.character())
+    
+    allies[nrow(allies) + 1,] = c(battle$attacker_1 %>% as.character(), battle$attacker_4 %>% as.character())
+    allies[nrow(allies) + 1,] = c(battle$attacker_2 %>% as.character(), battle$attacker_4 %>% as.character())
+    allies[nrow(allies) + 1,] = c(battle$attacker_3 %>% as.character(), battle$attacker_4 %>% as.character())
+  }
+  
+  if (!is.na(battle$defender_2)) {
+    allies[nrow(allies) + 1,] = c(battle$defender_2 %>% as.character(), battle$defender_1 %>% as.character())
+    
+    allies[nrow(allies) + 1,] = c(battle$defender_1 %>% as.character(), battle$defender_2 %>% as.character())
+  }
+  if (!is.na(battle$defender_3)) {
+    allies[nrow(allies) + 1,] = c(battle$defender_3 %>% as.character(), battle$defender_2 %>% as.character())
+    allies[nrow(allies) + 1,] = c(battle$defender_2 %>% as.character(), battle$defender_1 %>% as.character())
+    
+    allies[nrow(allies) + 1,] = c(battle$defender_1 %>% as.character(), battle$defender_3 %>% as.character())
+    allies[nrow(allies) + 1,] = c(battle$defender_3 %>% as.character(), battle$defender_2 %>% as.character())
+  }
+  if (!is.na(battle$defender_4)) {
+    allies[nrow(allies) + 1,] = c(battle$defender_4 %>% as.character(), battle$defender_1 %>% as.character())
+    allies[nrow(allies) + 1,] = c(battle$defender_4 %>% as.character(), battle$defender_2 %>% as.character())
+    allies[nrow(allies) + 1,] = c(battle$defender_4 %>% as.character(), battle$defender_3 %>% as.character())
+    
+    allies[nrow(allies) + 1,] = c(battle$defender_1 %>% as.character(), battle$defender_4 %>% as.character())
+    allies[nrow(allies) + 1,] = c(battle$defender_2 %>% as.character(), battle$defender_4 %>% as.character())
+    allies[nrow(allies) + 1,] = c(battle$defender_3 %>% as.character(), battle$defender_4 %>% as.character())
+  }
+}
+allies <- allies %>% group_by(first, last) %>% summarise(count = n()) %>% arrange(desc(count))
+
+enemies <- data.frame("first" = character(), "last" = character(), stringsAsFactors=FALSE)
+for (i in c(1:nrow(battles))) {
+  battle <- battles[i,]
+  enemies[nrow(enemies) + 1,] = c(battle$attacker_1 %>% as.character(), battle$defender_1 %>% as.character())
+  if (!is.na(battle$attacker_2)) {
+    enemies[nrow(enemies) + 1,] = c(battle$attacker_2 %>% as.character(), battle$defender_1 %>% as.character())
+  }
+  if (!is.na(battle$attacker_3)) {
+    enemies[nrow(enemies) + 1,] = c(battle$attacker_3 %>% as.character(), battle$defender_1 %>% as.character())
+  }
+  if (!is.na(battle$attacker_4)) {
+    enemies[nrow(enemies) + 1,] = c(battle$attacker_4 %>% as.character(), battle$defender_1 %>% as.character())
+  }
+  
+  if (!is.na(battle$defender_2)) {
+    enemies[nrow(enemies) + 1,] = c(battle$defender_2 %>% as.character(), battle$attacker_1 %>% as.character())
+  }
+  if (!is.na(battle$defender_3)) {
+    enemies[nrow(enemies) + 1,] = c(battle$defender_3 %>% as.character(), battle$attacker_1 %>% as.character())
+  }
+  if (!is.na(battle$defender_4)) {
+    enemies[nrow(enemies) + 1,] = c(battle$defender_4 %>% as.character(), battle$attacker_1 %>% as.character())
+  }
+}
+enemies <- enemies %>% group_by(first, last) %>% summarise(count = n() * -1) %>% arrange(desc(count))
+
+alls <- rbind(enemies, allies) %>% group_by(first, last) %>% summarize(distance = sum(count)) %>% arrange(desc(distance))
+print(alls)
+```
+```{r}
+p <- function(v) {
+  Reduce(f=paste, x = v %>% unique %>% sort)
+}
+library(reshape2)
+X <- dcast(alls,first~last) 
+X[is.na(X)] <- 0
+str(X)
+set.seed(100)
+clusters <- kmeans(X[2:27], 5, nstart = 20)
+plot(hclust(dist(X[, 2:27])), hang = -1, cex = 0.6, labels=X$first)
+data.frame(X$first, clusters$cluster) %>% group_by(clusters.cluster) %>% mutate(allies = p(X.first)) %>% summarize(allies = first(allies))
+
+
+```
+
+Calculation winrates
+```{r}
+allies <- data.frame("house" = character(), "result" = character(), stringsAsFactors=FALSE)
+for (i in c(1:nrow(battles))) {
+  battle <- battles[i,]
+  if (!is.na(battle$attacker_1)) {
+    
+  }
+}
+```
+
+```{r}
+library(reshape)
+library(DescTools)
+calcResult <- function(side, result) {
+  if (side %like% "attacker%") {
+    if (result == "win") return(1)
+    else return(0)
+  }
+  if (side %like% "defender%") {
+    if (result == "win") return(0)
+    else return(1)
+  }
+}
+battles %>% 
+  select(c("attacker_1", "attacker_2", "attacker_3", "attacker_4",
+           "defender_1", "defender_2", "defender_3", "defender_4", "attacker_outcome")) %>%
+  melt(id = "attacker_outcome") %>%
+  na.omit %>%
+  rowwise %>%
+  mutate(result = calcResult(variable, attacker_outcome)) %>%
+  group_by(value) %>% 
+  summarize(winrate = sum(result) / n(), number_of_battles = n()) %>%
+  arrange(desc(number_of_battles))
+```
+
+Finding the most dangerous title
+```{r}
+unite <- function(title) {
+  if (title %like% "Lord%" || title %like% "Lady%" || title == "Winterfell") return("Lord/Lady")
+  else if (title %like% "Prince%") return("Prince(ss)")
+  else if (title %like% "%Maester%" || title == "Archmaester") return("Maester")
+  else if (title == "") return("Commoner")
+  else if (title == "Septa" || title == "Septon") return("Septon/Septa") 
+  else return("Other")
+}
+
+aliverate <- data %>%
+  rowwise %>%
+  mutate(united_title = unite(title)) %>% 
+  group_by(united_title) %>%
+  summarise(alive = 100 * sum(isAlive) / n(), count = n()) %>%
+  arrange(count) %>%
+  tail(7)
+aliverate$id <- seq.int(nrow(aliverate))
+  
+library(ggplot2)
+ 
+ 
+    
+# Circular one
+ggplot(aliverate, aes(x = id, y = alive ,fill = united_title)) + 
+    geom_bar(width = 1, stat="identity") +    
+    
+    # To use a polar plot and not a basic barplot
+    coord_polar(theta = "y") +    
+    
+    #Remove useless labels of axis
+    xlab("") + ylab("") +
+    
+    #Increase ylim to avoid having a complete circle
+    ylim(c(0,100)) + 
+    
+    #Add group labels close to the bars :
+    geom_text(data = aliverate, hjust = 1, size = 3, aes(x = id, y = 0, label = united_title)) +
+    
+    #Remove useless legend, y axis ticks and y axis text
+    theme(legend.position = "none" , axis.text.y = element_blank() , axis.ticks = element_blank())
+  
+```
+
+
+
+```{r}
+# character_deaths[] <- lapply(character_deaths, factor)
+battles[] <- lapply(battles, factor)
+# cleaned_pred = character_predictions %>%
+#   filter(culture!="") %>%
+#   filter(title!="")
+# 
+# cleaned_pred$actual <- NULL
+# cleaned_pred$pred <- NULL
+# cleaned_pred$mother <- NULL
+# cleaned_pred$father <- NULL 
+# cleaned_pred$S.No <- NULL 
+# cleaned_pred[] <- lapply(qwe, factor)
+library(arules)
+rules = apriori(battles, parameter=list(conf=0.95))
+rules = as(rules,"data.frame")
+rules = rules %>% arrange(-lift)
+
+
+# {defender_1=Tully} => {attacker_1=Lannister}
+# {defender_1=Lannister,battle_type=ambush} => {attacker_1=Stark}
+```
+
