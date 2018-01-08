@@ -10,11 +10,11 @@ library(dplyr)
 data <- read.csv("character-predictions.csv")
 table(data$title)
 table(data$culture)
-str(data)
+
 
 battles <- read.csv("battles.csv", na.strings=c(""))
 battles %>% str
-
+character_deaths <- read.csv("character-deaths.csv")
 data %>% filter(title == "Winterfell")
 ```
 
@@ -114,8 +114,8 @@ X <- dcast(alls,first~last)
 X[is.na(X)] <- 0
 str(X)
 set.seed(100)
-clusters <- kmeans(X[2:27], 5, nstart = 20)
-plot(hclust(dist(X[, 2:27])), hang = -1, cex = 0.6, labels=X$first)
+clusters <- kmeans(X[2:26], 5, nstart = 20)
+plot(hclust(dist(X[, 2:26])), hang = -1, cex = 0.6, labels=X$first)
 data.frame(X$first, clusters$cluster) %>% group_by(clusters.cluster) %>% mutate(allies = p(X.first)) %>% summarize(allies = first(allies))
 
 
@@ -202,6 +202,13 @@ ggplot(aliverate, aes(x = id, y = alive ,fill = united_title)) +
   
 ```
 
+```{r}
+data %>% select(spouse, name) %>%
+  filter(spouse != "") %>%
+  filter(spouse == "Walder Frey")#|| spouse == "Craster")
+
+data %>% select(father) %>% group_by(father) %>% summarise(count = n()) %>% arrange(desc(count))
+```
 
 
 ```{r}
@@ -225,5 +232,28 @@ rules = rules %>% arrange(-lift)
 
 # {defender_1=Tully} => {attacker_1=Lannister}
 # {defender_1=Lannister,battle_type=ambush} => {attacker_1=Stark}
+```
+
+```{r}
+aggregated_deaths = character_deaths %>%
+  filter(!is.na(Book.of.Death)) %>%
+  dplyr::filter(!grepl("House",Allegiances))
+
+ggplot(aggregated_deaths, aes(x=Allegiances, y=Book.of.Death)) +
+  geom_violin(data=aggregated_deaths, aes(color=Allegiances), alpha=0.5) +
+  geom_jitter(alpha=0.5, aes(color=Allegiances),position = position_jitter(width = .2)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+
+```{r}
+character_deaths %>%
+  melt(id.vars = "Allegiances", measure.vars = c("GoT", "CoK", "SoS", "FfC", "DwD")) %>%
+  group_by(.dots=c("variable","Allegiances")) %>%
+  dplyr::summarize(References = sum(value)) %>%
+  ggplot(.) +
+    geom_tile(aes(x=Allegiances,y=variable,fill=References)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    scale_fill_gradientn(colours = c("#ffffff", "#5858FA", "#0b1c86"))
 ```
 
