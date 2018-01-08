@@ -1,21 +1,21 @@
 ## Business understanding
 
-Project Title: ThronesMiner
+Project Title: ThronesMining
 Team Members: Maksym Yerokhin and Roman Ismagilov
 
 ### Identifying your business goals
 #### Background
 Considering the popular TV series "Game of Thrones" people wonder what events 
-(and especially deaths) shall happen next. Each season one of the houses (e.g. Lannisters or Starks) can dominate over another, so there comes other common questions - whose role is to be a victim and whose is going to be a winner.
+(and especially deaths) shall happen next. Each season one of the houses (e.g. Lannisters or Starks) can dominate over another, so there comes other common questions - whose role is to be a victim and whose is going to be a winner in upcoming battles.
 
 #### Business goals
-ThronesMiner can provide predictions and analysis of previous seasons’ events that can be used in different fields, e.g. in betting. Specifically, our model should be able to answer the following questions: 
-what house is most likely to occupy the throne for now;
-what is the rating of death probability of main characters;
-what are the bonds between houses, how much they are reliable.
+ThronesMining can provide analysis of previous seasons’ events that can be used in different fields, e.g. in betting. Specifically, our model should be able to answer the following questions:
+what is needed to fulfill the successfull attack;
+how much is likely for different kinds of characters to die;
+what are the bonds between houses, how much they are reliable, what are potential alliances.
 
 #### Business success criteria
-The main success criterion is model usage after first series of the new season passed, if the predictions are correct enough then people’s interest will remain at the high level.
+The main success criterion is model usage after first series of the new season passed, if the analysis is useful and correct enough then people’s interest will remain at the high level.
 
 #### Assessing your situation
 Inventory of resources   
@@ -41,7 +41,7 @@ Data-mining goals
 Clear and update data rows by similar records, details of which are unnecessary for model, e.g. different kinds of “lords”;
 Create infographics for intuitively comprehensive visualization of houses relations and living characters death probabilities;
 Find is there any “support” and how much of certain characters from author or scenarists (e.g. characters should have die long time ago but he is still alive);
-Try neural network, decision trees and frequent patterns approaches in prediction what will be the next battle, what will be the place of main events, who is likely to die and, eventually, who will occupy the “Iron Throne”.
+Perform hierarchical clusterization for houses, explore relationships and potential alliances.
 
 Data-mining success criteria
 Since our dataset does not cover all of the present seasons, we can check our predictions for 5th season and try to reach at least 85% accuracy in predictions.
@@ -69,7 +69,7 @@ Link to the slide: https://docs.google.com/presentation/d/1veA_WQcfRRx7hQnE8qklm
 #### Tasks to accomplish:
 - Clear and update the dataset grouping by similar records, details of which are unnecessary for model, e.g. different kinds of “lords”; 3h
 - Create infographics for intuitively comprehensive visualization of houses relations and living characters death probabilities. This should include histogrammes, heatmaps and graphs; 8h     
-- Try neural network, decision trees and frequent patterns approaches in prediction what will be the next battle, what will be the place of main events, who is likely to die and, eventually, who will occupy the “Iron Throne”; 30h     
-- Find is there any “support” and how much of certain characters from author or scenarists (e.g. characters should have die long time ago but he is still alive). To achieve this we should calculate the death probability and use permutation tests to see whether it is realistic; 4h    
+- Perform clusterization, find out fun and surprising facts that can reveal some important conditions for dominating one house over another; 30h     
+- Find is there any “support” and how much of certain characters from author or scenarists (e.g. characters should have die long time ago but he is still alive). 4h    
 - Extend datasets if necessary with events from seasons 5-7. 5h    
 
